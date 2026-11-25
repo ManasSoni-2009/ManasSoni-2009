@@ -2,6 +2,7 @@ import opentype from 'opentype.js';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import fs from 'node:fs/promises';
 import fsSync from 'node:fs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -28,7 +29,8 @@ const loadedFonts = {};
 export async function loadVectorFonts() {
   if (Object.keys(loadedFonts).length > 0) return loadedFonts;
   for (const [key, filePath] of Object.entries(FONT_FILES)) {
-    loadedFonts[key] = await opentype.load(filePath);
+    const buf = await fs.readFile(filePath);
+    loadedFonts[key] = opentype.parse(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength));
   }
   return loadedFonts;
 }
